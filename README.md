@@ -7,6 +7,7 @@ Project Idea: A game designed to improve reflexes, provide a challenge, and prov
 Team Members:
 
 Michael Ajayi
-Joshua Oladipo
+Joshua Oladapo
 
 Current Status: Initial project planning and repository setup completed.
+
