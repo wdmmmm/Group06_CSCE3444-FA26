@@ -1,1 +1,43 @@
 <!-- index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Snake</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Snake</h1>
+
+  <!-- Start menu -->
+  <div id="start-screen">
+    <p>High score: <span id="high-start">0</span></p>
+    <p>Pick a speed to start:</p>
+    <button data-speed="180">Easy</button>
+    <button data-speed="130">Medium</button>
+    <button data-speed="80">Hard</button>
+    <p>Move with WASD or the arrow keys.</p>
+  </div>
+
+  <!-- Score during play -->
+  <p id="score-line" hidden>Score: <span id="score">0</span></p>
+
+  <!-- Game canvas: 20 cells x 20px = 400px -->
+  <canvas id="canvas" width="400" height="400" hidden></canvas>
+
+  <!-- Game over -->
+  <div id="game-over" hidden>
+    <h2>Game Over</h2>
+    <p>Score: <span id="final-score">0</span></p>
+    <p>High score: <span id="final-high">0</span></p>
+    <button id="play-again">Play Again</button>
+    <button id="main-menu">Main Menu</button>
+  </div>
+
+  <script src="snake.js"></script>
+  <script src="board.js"></script>
+  <script type="module" src="main.js"></script>
+</body>
+</html>
