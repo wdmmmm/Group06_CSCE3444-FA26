@@ -2,6 +2,7 @@
 import { Food } from './food.js';
 import { getHighScore, saveHighScore } from './storage.js';
 import { getDifficulty } from './difficulty.js';
+import { Game } from './game.js';
 
 const CELL = 20;
 const canvas = document.getElementById('canvas');
@@ -13,7 +14,7 @@ const food = new Food({ cols: 20, rows: 20, cellSize: CELL });
 
 let score = 0;
 let difficulty = getDifficulty('medium');
-let timer = null;
+const game = new Game(tick);
 
 let highScore = getHighScore();
 function occupied() {
@@ -25,7 +26,8 @@ function show(id, visible) {
 }
 
 function showMenu() {
-  clearInterval(timer);
+  game.end();
+  show('pause-btn', false);
   document.getElementById('high-start').textContent = highScore;
   show('start-screen', true);
   show('canvas', false);
@@ -34,7 +36,6 @@ function showMenu() {
 }
 
 function startGame() {
-  clearInterval(timer);
   snake.reset(10, 10);
   board.placeObstacles(difficulty.obstacles, snake.head);
 
@@ -48,7 +49,9 @@ function startGame() {
   show('score-line', true);
 
   draw();
-  timer = setInterval(tick, difficulty.speed);
+  show('pause-btn', true);
+  document.getElementById('pause-btn').textContent = 'Pause';
+  game.start(difficulty.speed);
 }
 
 function tick() {
@@ -70,7 +73,8 @@ function tick() {
 }
 
 function endGame() {
-  clearInterval(timer);
+  game.end();
+  show('pause-btn', false);
   highScore = saveHighScore(score);
   document.getElementById('final-score').textContent = score;
   document.getElementById('final-high').textContent = highScore;
@@ -102,12 +106,24 @@ function draw() {
   }
 }
 
+function togglePause() {
+  game.togglePause();
+  document.getElementById('pause-btn').textContent =
+    game.state === 'paused' ? 'Resume' : 'Pause';
+}
+
+
 const KEYS = {
   w: 'UP', a: 'LEFT', s: 'DOWN', d: 'RIGHT',
   arrowup: 'UP', arrowleft: 'LEFT', arrowdown: 'DOWN', arrowright: 'RIGHT',
 };
 
 document.addEventListener('keydown', (e) => {
+  if (e.key.toLowerCase() === 'p') {
+    togglePause();
+    return;
+  }
+  if (game.state === 'paused') return;
   const dir = KEYS[e.key.toLowerCase()];
   if (dir) {
     snake.changeDirection(dir);
@@ -123,5 +139,5 @@ document.querySelectorAll('[data-difficulty]').forEach((btn) => {
 });
 document.getElementById('play-again').addEventListener('click', startGame);
 document.getElementById('main-menu').addEventListener('click', showMenu);
-
+document.getElementById('pause-btn').addEventListener('click', togglePause);
 showMenu();
