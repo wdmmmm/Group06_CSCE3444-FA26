@@ -16,6 +16,9 @@ let difficulty = getDifficulty('medium');
 let timer = null;
 
 let highScore = getHighScore();
+function occupied() {
+  return snake.body.concat(board.obstacles);
+}
 
 function show(id, visible) {
   document.getElementById(id).hidden = !visible;
@@ -33,10 +36,11 @@ function showMenu() {
 function startGame() {
   clearInterval(timer);
   snake.reset(10, 10);
+  board.placeObstacles(difficulty.obstacles, snake.head);
 
   score = 0;
   document.getElementById('score').textContent = score;
-  food.spawn(snake.body);
+  food.spawn(occupied());
 
   show('start-screen', false);
   show('game-over', false);
@@ -50,6 +54,7 @@ function startGame() {
 function tick() {
   const h = snake.nextHead();
   if (board.isOutOfBounds(h.x, h.y)) return endGame();
+  if (board.isObstacle(h.x, h.y)) return endGame();
 
   const ate = food.isEatenBy(h);
   if (!snake.move(ate)) return endGame();
@@ -76,6 +81,20 @@ function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   food.draw(ctx);
+  for (const o of board.obstacles) {
+    const px = o.x * CELL;
+    const py = o.y * CELL;
+    ctx.fillStyle = '#888';
+    ctx.fillRect(px, py, CELL - 1, CELL - 1);
+    ctx.strokeStyle = '#222';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(px + 4, py + 4);
+    ctx.lineTo(px + CELL - 5, py + CELL - 5);
+    ctx.moveTo(px + CELL - 5, py + 4);
+    ctx.lineTo(px + 4, py + CELL - 5);
+    ctx.stroke();
+  }
 
   ctx.fillStyle = 'lime';
   for (const part of snake.body) {
