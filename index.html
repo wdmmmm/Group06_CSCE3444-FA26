@@ -16,14 +16,15 @@
     <div id="start-screen">
       <p>High score: <span id="high-start">0</span></p>
       <p>Pick a speed to start:</p>
-      <button data-speed="180">Easy</button>
-      <button data-speed="130">Medium</button>
-      <button data-speed="80">Hard</button>
-      <p>Move with WASD or the arrow keys.</p>
+      <button data-difficulty="easy">Easy</button>
+      <button data-difficulty="medium">Medium</button>
+      <button data-difficulty="hard">Hard</button>
+      <p>Move with WASD or the arrow keys. Press P to pause.</p>
     </div>
 
     <!-- Score during play (optional: aria-live announces score changes) -->
     <p id="score-line" hidden>Score: <span id="score" aria-live="polite">0</span></p>
+    <button id="pause-btn" hidden>Pause</button>
 
     <!-- Game canvas: 20 cells x 20px = 400px (optional: role and label for screen readers) -->
     <canvas id="canvas" width="400" height="400" role="img" aria-label="Snake game board" hidden></canvas>
