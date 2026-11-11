@@ -1,6 +1,7 @@
 // main.js - wires Snake, GameBoard and Food together to play
 import { Food } from './food.js';
 import { getHighScore, saveHighScore } from './storage.js';
+import { getDifficulty } from './difficulty.js';
 
 const CELL = 20;
 const canvas = document.getElementById('canvas');
@@ -11,7 +12,7 @@ const snake = new Snake(10, 10);
 const food = new Food({ cols: 20, rows: 20, cellSize: CELL });
 
 let score = 0;
-let speed = 130;
+let difficulty = getDifficulty('medium');
 let timer = null;
 
 let highScore = getHighScore();
@@ -43,7 +44,7 @@ function startGame() {
   show('score-line', true);
 
   draw();
-  timer = setInterval(tick, speed);
+  timer = setInterval(tick, difficulty.speed);
 }
 
 function tick() {
@@ -63,7 +64,13 @@ function tick() {
   draw();
 }
 
-highScore = saveHighScore(score);
+function endGame() {
+  clearInterval(timer);
+  highScore = saveHighScore(score);
+  document.getElementById('final-score').textContent = score;
+  document.getElementById('final-high').textContent = highScore;
+  show('game-over', true);
+}
 
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -89,9 +96,9 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-document.querySelectorAll('[data-speed]').forEach((btn) => {
+document.querySelectorAll('[data-difficulty]').forEach((btn) => {
   btn.addEventListener('click', () => {
-    speed = Number(btn.dataset.speed);
+    difficulty = getDifficulty(btn.dataset.difficulty);
     startGame();
   });
 });
