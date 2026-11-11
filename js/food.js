@@ -7,6 +7,8 @@
 //   food.draw(ctx);
 //   if (food.isEatenBy(snake.head)) { score += food.points; food.spawn(snake.body); }
 
+
+
 const FOOD_TYPES = {
   normal: { color: '#e74c3c', points: 1, weight: 85, lifetime: null },
   bonus:  { color: '#f1c40f', points: 5, weight: 15, lifetime: 5000 }, // disappears after 5s

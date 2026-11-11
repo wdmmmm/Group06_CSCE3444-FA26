@@ -1,5 +1,6 @@
 // main.js - wires Snake, GameBoard and Food together to play
 import { Food } from './food.js';
+import { getHighScore, saveHighScore } from './storage.js';
 
 const CELL = 20;
 const canvas = document.getElementById('canvas');
@@ -13,10 +14,7 @@ let score = 0;
 let speed = 130;
 let timer = null;
 
-let highScore = 0;
-try {
-  highScore = Number(localStorage.getItem('highScore')) || 0;
-} catch (e) {}
+let highScore = getHighScore();
 
 function show(id, visible) {
   document.getElementById(id).hidden = !visible;
@@ -65,18 +63,7 @@ function tick() {
   draw();
 }
 
-function endGame() {
-  clearInterval(timer);
-  if (score > highScore) {
-    highScore = score;
-    try {
-      localStorage.setItem('highScore', highScore);
-    } catch (e) {}
-  }
-  document.getElementById('final-score').textContent = score;
-  document.getElementById('final-high').textContent = highScore;
-  show('game-over', true);
-}
+highScore = saveHighScore(score);
 
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
