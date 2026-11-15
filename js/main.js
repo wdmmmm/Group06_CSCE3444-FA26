@@ -1,4 +1,4 @@
-// main.js - wires Snake, GameBoard and Food together to play
+// main.js - wires Snake, GameBoard, Food, and Game together to play
 import { Food } from './food.js';
 import { getHighScore, saveHighScore } from './storage.js';
 import { getDifficulty } from './difficulty.js';
@@ -11,12 +11,21 @@ const ctx = canvas.getContext('2d');
 const board = new GameBoard(20, 20);
 const snake = new Snake(10, 10);
 const food = new Food({ cols: 20, rows: 20, cellSize: CELL });
+const game = new Game(tick);
+
+const stars = [];
+for (let i = 0; i < 40; i++) {
+  stars.push({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    size: Math.random() < 0.2 ? 2 : 1,
+  });
+}
 
 let score = 0;
 let difficulty = getDifficulty('medium');
-const game = new Game(tick);
-
 let highScore = getHighScore();
+
 function occupied() {
   return snake.body.concat(board.obstacles);
 }
@@ -27,7 +36,6 @@ function show(id, visible) {
 
 function showMenu() {
   game.end();
-  show('pause-btn', false);
   document.getElementById('high-start').textContent = highScore;
   show('start-screen', true);
   show('canvas', false);
@@ -49,8 +57,6 @@ function startGame() {
   show('score-line', true);
 
   draw();
-  show('pause-btn', true);
-  document.getElementById('pause-btn').textContent = 'Pause';
   game.start(difficulty.speed);
 }
 
@@ -65,16 +71,15 @@ function tick() {
   if (ate) {
     score += food.points * 10; // normal = 10, bonus = 50
     document.getElementById('score').textContent = score;
-    food.spawn(snake.body);
+    food.spawn(occupied());
   } else if (food.isExpired()) {
-    food.spawn(snake.body); // bonus food timed out
+    food.spawn(occupied()); // bonus food timed out
   }
   draw();
 }
 
 function endGame() {
   game.end();
-  show('pause-btn', false);
   highScore = saveHighScore(score);
   document.getElementById('final-score').textContent = score;
   document.getElementById('final-high').textContent = highScore;
@@ -84,34 +89,49 @@ function endGame() {
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+  for (const s of stars) ctx.fillRect(s.x, s.y, s.size, s.size);
+
+  for (const o of board.obstacles) drawAsteroid(o);
+
+  ctx.shadowColor = food.color;
+  ctx.shadowBlur = 14;
   food.draw(ctx);
-  for (const o of board.obstacles) {
-    const px = o.x * CELL;
-    const py = o.y * CELL;
-    ctx.fillStyle = '#888';
-    ctx.fillRect(px, py, CELL - 1, CELL - 1);
-    ctx.strokeStyle = '#222';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(px + 4, py + 4);
-    ctx.lineTo(px + CELL - 5, py + CELL - 5);
-    ctx.moveTo(px + CELL - 5, py + 4);
-    ctx.lineTo(px + 4, py + CELL - 5);
-    ctx.stroke();
-  }
+  ctx.shadowBlur = 0;
 
-  ctx.fillStyle = 'lime';
-  for (const part of snake.body) {
-    ctx.fillRect(part.x * CELL, part.y * CELL, CELL - 1, CELL - 1);
-  }
+  drawSnake();
 }
 
-function togglePause() {
-  game.togglePause();
-  document.getElementById('pause-btn').textContent =
-    game.state === 'paused' ? 'Resume' : 'Pause';
+function drawAsteroid(o) {
+  const cx = o.x * CELL + CELL / 2;
+  const cy = o.y * CELL + CELL / 2;
+
+  ctx.fillStyle = '#5b7a8c';
+  ctx.beginPath();
+  ctx.moveTo(cx - 8, cy - 3);
+  ctx.lineTo(cx - 3, cy - 9);
+  ctx.lineTo(cx + 5, cy - 8);
+  ctx.lineTo(cx + 9, cy - 1);
+  ctx.lineTo(cx + 6, cy + 8);
+  ctx.lineTo(cx - 4, cy + 9);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.fillStyle = '#34495e';
+  ctx.beginPath();
+  ctx.arc(cx - 2, cy - 2, 3, 0, Math.PI * 2);
+  ctx.fill();
 }
 
+function drawSnake() {
+  ctx.shadowColor = '#22d3ee';
+  ctx.shadowBlur = 10;
+  snake.body.forEach((part, i) => {
+    ctx.fillStyle = i === 0 ? '#a5f3fc' : '#22d3ee';
+    ctx.fillRect(part.x * CELL + 1, part.y * CELL + 1, CELL - 2, CELL - 2);
+  });
+  ctx.shadowBlur = 0;
+}
 
 const KEYS = {
   w: 'UP', a: 'LEFT', s: 'DOWN', d: 'RIGHT',
@@ -120,7 +140,7 @@ const KEYS = {
 
 document.addEventListener('keydown', (e) => {
   if (e.key.toLowerCase() === 'p') {
-    togglePause();
+    game.togglePause();
     return;
   }
   if (game.state === 'paused') return;
@@ -139,5 +159,5 @@ document.querySelectorAll('[data-difficulty]').forEach((btn) => {
 });
 document.getElementById('play-again').addEventListener('click', startGame);
 document.getElementById('main-menu').addEventListener('click', showMenu);
-document.getElementById('pause-btn').addEventListener('click', togglePause);
+
 showMenu();

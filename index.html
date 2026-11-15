@@ -5,7 +5,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Snake</title>
+  <title>Scale UP</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -24,8 +26,7 @@
 
     <!-- Score during play (optional: aria-live announces score changes) -->
     <p id="score-line" hidden>Score: <span id="score" aria-live="polite">0</span></p>
-    <button id="pause-btn" hidden>Pause</button>
-
+    <p id="score-line" hidden>Score: <span id="score" aria-live="polite">0</span> <span id="pause-note" hidden>(Paused)</span></p>
     <!-- Game canvas: 20 cells x 20px = 400px (optional: role and label for screen readers) -->
     <canvas id="canvas" width="400" height="400" role="img" aria-label="Snake game board" hidden></canvas>
 
