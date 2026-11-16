@@ -11,7 +11,7 @@
 
 const FOOD_TYPES = {
   normal: { color: '#e74c3c', points: 1, weight: 85, lifetime: null },
-  bonus:  { color: '#f1c40f', points: 5, weight: 15, lifetime: 5000 }, // disappears after 5s
+  bonus:  { color: '#f39c12', points: 5, weight: 15, lifetime: 5000 }, // disappears after 5s
 };
 
 export class Food {
@@ -72,7 +72,7 @@ export class Food {
     return lifetime !== null && now - this.spawnedAt > lifetime;
   }
 
-  /** Draw the food on a 2D canvas context. */
+  /** Draw the food on a 2D canvas context (apple = normal, orange = bonus). */
   draw(ctx) {
     const size = this.cellSize;
     const cx = this.x * size + size / 2;
@@ -84,14 +84,70 @@ export class Food {
       const pulse = Math.sin((performance.now() - this.spawnedAt) / 120) * 2;
       radius += pulse;
     }
+    radius = Math.max(radius, 2);
 
-    ctx.fillStyle = this.color;
-    ctx.beginPath();
-    ctx.arc(cx, cy, Math.max(radius, 2), 0, Math.PI * 2);
-    ctx.fill();
+    if (this.type === 'bonus') this._drawOrange(ctx, cx, cy, radius);
+    else this._drawApple(ctx, cx, cy, radius);
   }
 
   // --- internal ---
+
+  _drawApple(ctx, cx, cy, r) {
+    // Body: two overlapping lobes give the apple its slightly wider, heart-ish shape
+    ctx.fillStyle = this.color;
+    for (const dx of [-0.3, 0.3]) {
+      ctx.beginPath();
+      ctx.arc(cx + dx * r, cy + 0.1 * r, r * 0.75, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Shine
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+    ctx.beginPath();
+    ctx.arc(cx - 0.5 * r, cy - 0.1 * r, r * 0.2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Stem
+    ctx.strokeStyle = '#6b3e1f';
+    ctx.lineWidth = 1.5;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - 0.5 * r);
+    ctx.quadraticCurveTo(cx, cy - 0.95 * r, cx + 0.15 * r, cy - 1.1 * r);
+    ctx.stroke();
+
+    // Leaf
+    ctx.fillStyle = '#2ecc71';
+    ctx.beginPath();
+    ctx.ellipse(cx + 0.5 * r, cy - 0.8 * r, r * 0.3, r * 0.15, -Math.PI / 6, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  _drawOrange(ctx, cx, cy, r) {
+    // Body
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    ctx.arc(cx, cy + 0.05 * r, r, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Shine
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.beginPath();
+    ctx.arc(cx - 0.4 * r, cy - 0.3 * r, r * 0.2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Dimple where the stem attaches
+    ctx.fillStyle = '#d35400';
+    ctx.beginPath();
+    ctx.arc(cx, cy - 0.85 * r, r * 0.15, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Leaf
+    ctx.fillStyle = '#27ae60';
+    ctx.beginPath();
+    ctx.ellipse(cx + 0.3 * r, cy - 0.95 * r, r * 0.3, r * 0.14, -Math.PI / 8, 0, Math.PI * 2);
+    ctx.fill();
+  }
 
   _pickType() {
     let type = 'normal';
