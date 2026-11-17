@@ -30,6 +30,21 @@ function occupied() {
   return snake.body.concat(board.obstacles);
 }
 
+let extraObstacles = 0; // asteroids added mid-game by replaced food spawns
+
+// Spawns the next food. On difficulties with obstacleSpawnChance (hard only),
+// some spawns are replaced by an asteroid in the old food's spot, and the food
+// then spawns on another free cell so there is always something to eat.
+function spawnFood() {
+  if (difficulty.obstacleSpawnChance > 0
+      && extraObstacles < difficulty.maxExtraObstacles
+      && Math.random() < difficulty.obstacleSpawnChance) {
+    const blocked = occupied().concat([{ x: food.x, y: food.y }]);
+    if (board.addObstacle(blocked, snake.head)) extraObstacles++;
+  }
+  food.spawn(occupied());
+}
+
 function show(id, visible) {
   document.getElementById(id).hidden = !visible;
 }
@@ -48,6 +63,7 @@ function startGame() {
   board.placeObstacles(difficulty.obstacles, snake.head);
 
   score = 0;
+  extraObstacles = 0;
   document.getElementById('score').textContent = score;
   food.spawn(occupied());
 
@@ -71,9 +87,9 @@ function tick() {
   if (ate) {
     score += food.points * 10; // normal = 10, bonus = 50
     document.getElementById('score').textContent = score;
-    food.spawn(occupied());
+    spawnFood();
   } else if (food.isExpired()) {
-    food.spawn(occupied()); // bonus food timed out
+    spawnFood(); // bonus food timed out
   }
   draw();
 }
